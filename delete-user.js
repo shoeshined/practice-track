@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import { input } from "@inquirer/prompts";
+import { input, password } from "@inquirer/prompts";
 import { DatabaseSync } from "node:sqlite";
 const database = new DatabaseSync("./test.db");
 
@@ -16,9 +16,12 @@ export async function deleteUser() {
 		tryout = select.get(username);
 	}
 
-	let password = await input({ message: "password?" });
-	while (password !== tryout.password) {
-		password = await input({ message: "Wrong password. Try again:" });
+	let pw = await password({ message: "password?", mask: true });
+	while (pw !== tryout.password) {
+		pw = await password({
+			message: "Wrong password. Try again:",
+			mask: true,
+		});
 	}
 
 	const userDelete = database.prepare(`DELETE FROM users WHERE username = ?`);

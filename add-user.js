@@ -6,7 +6,13 @@ import { DatabaseSync } from "node:sqlite";
 const database = new DatabaseSync("./test.db");
 
 export async function addUser() {
-	let create = `CREATE TABLE if not exists users(id INTEGER PRIMARY KEY,first_name,last_name,username,password,email)`;
+	let create = `CREATE TABLE if not exists users(
+		id INTEGER PRIMARY KEY,
+		first_name STRING,
+		last_name STRING,
+		username STRING UNIQUE NOT NULL,
+		password NOT NULL,
+		email NOT NULL)`;
 	database.exec(create);
 
 	const first_name = await input({ message: "What's your first name?" }),

@@ -1,27 +1,33 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import { rawlist, input, confirm } from "@inquirer/prompts";
+import { input, confirm } from "@inquirer/prompts";
+import prompt from "inquirer-interactive-list-prompt";
 import { DatabaseSync } from "node:sqlite";
 const database = new DatabaseSync("./test.db");
 
 export async function searchUser() {
-	let exists = database.prepare(
-		`SELECT name FROM sqlite_master WHERE type='table' AND name='users'`
-	);
-	const does = exists.get();
-	if (!does) {
+	let exists = `SELECT name FROM sqlite_master WHERE type='table' AND name='users'`,
+		empty = `SELECT count(*) FROM (select 1 from users limit 1)`;
+
+	const does = (await database.prepare(exists).get())
+		? await database.prepare(empty).get()["count(*)"]
+		: 0;
+	if (does === 0) {
 		console.log(chalk.red("There's no users listed at all! Sorry!"));
 		return;
 	}
-	const choice = await rawlist({
+
+	const choice = await prompt({
 		message: "Search by what?",
 		choices: [
-			{ name: "Username", value: "username" },
-			{ name: "First name", value: "first_name" },
-			{ name: "Last Name", value: "last_name" },
-			{ name: "Email", value: "email" },
+			{ name: "Username", value: "username", key: "1" },
+			{ name: "First name", value: "first_name", key: "2" },
+			{ name: "Last Name", value: "last_name", key: "3" },
+			{ name: "Email", value: "email", key: "4" },
 		],
+		renderSelected: choice => chalk.green(`❯ ${choice.key}) ${choice.name}`),
+		renderUnselected: choice => `  ${choice.key}) ${choice.name}`,
 	});
 
 	let value = await input({ message: "search:" });
