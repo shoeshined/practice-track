@@ -8,11 +8,11 @@ const database = new DatabaseSync("./test.db");
 export async function addUser() {
 	let create = `CREATE TABLE if not exists users(
 		id INTEGER PRIMARY KEY,
-		first_name STRING,
-		last_name STRING,
-		username STRING UNIQUE NOT NULL,
-		password NOT NULL,
-		email NOT NULL)`;
+		first_name TEXT NOT NULL,
+		last_name TEXT,
+		username TEXT UNIQUE NOT NULL,
+		password TEXT NOT NULL,
+		email TEXT NOT NULL)`;
 	database.exec(create);
 
 	const first_name = await input({ message: "What's your first name?" }),

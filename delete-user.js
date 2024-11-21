@@ -3,9 +3,10 @@
 import chalk from "chalk";
 import { input, password } from "@inquirer/prompts";
 import { DatabaseSync } from "node:sqlite";
-const database = new DatabaseSync("./test.db");
 
 export async function deleteUser() {
+	const database = new DatabaseSync("./test.db");
+
 	let username = await input({ message: "What's the username?" });
 
 	let select = database.prepare(`SELECT * FROM users where username = ?`);
@@ -25,7 +26,7 @@ export async function deleteUser() {
 	}
 
 	const userDelete = database.prepare(`DELETE FROM users WHERE username = ?`);
-	const done = userDelete.run(username);
+	userDelete.run(username);
 	database.close();
 
 	console.log(
