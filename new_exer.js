@@ -6,12 +6,13 @@ export async function new_exer(userId) {
 
 	let createExers = `CREATE TABLE if not exists exercises(
         id INTEGER PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id),
+        user_id INTEGER,
         name TEXT NOT NULL UNIQUE,
         description TEXT,
         key INTEGER,
         bpm INTEGER,
-        count INTEGER
+        count INTEGER,
+		FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
     )`;
 	database.exec(createExers);
 
@@ -23,7 +24,7 @@ export async function new_exer(userId) {
 	const exerInsert = database.prepare(
 		`INSERT INTO exercises(user_id, name, description, key, bpm, count) VALUES (?,?,?,?,?,?)`
 	);
-	exerInsert.run(userId, name, description, key, bmp, 0);
+	let test = exerInsert.run(userId, name, description, key, bmp, 0);
 
 	database.close();
 }

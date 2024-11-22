@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { DatabaseSync } from "node:sqlite";
-import { select, confirm } from "@inquirer/prompts";
+import { select, confirm, input } from "@inquirer/prompts";
 import pkg from "terminal-kit";
 import chalk from "chalk";
 const term = pkg.terminal;
@@ -29,20 +29,33 @@ export async function view_exer(id) {
 
 	term.table([header, ...tableRows], { fit: false });
 
-	let editOrDel = await select({
-		message: "Would you like to delete or edit an exercise?",
-		choices: [
-			{ name: "Edit", value: 1 },
-			{ name: "Delete", value: 2 },
-			{ name: "Return to menu", value: 0 },
-		],
-	});
+	for (let editOrDel = 0; true; ) {
+		let message = editOrDel === 0 ? "an" : "another";
 
-	if (editOrDel === 0) {
-		database.close();
-		return;
+		editOrDel = await select({
+			message: `Would you like to delete or edit ${message} exercise?`,
+			choices: [
+				{ name: "Edit", value: 1 },
+				{ name: "Delete", value: 2 },
+				{ name: "Nope. Return to menu", value: 0 },
+			],
+		});
+
+		if (editOrDel === 0) {
+			break;
+		}
+
+		if (editOrDel === 1) {
+			await editExer(excercises, database);
+		} else {
+			await deleteExer(excercises, database);
+		}
 	}
 
+	database.close();
+}
+
+async function editExer(excercises, database) {
 	let names = excercises.map((line, ind) => {
 		return { name: line.name, value: ind };
 	});
@@ -51,30 +64,56 @@ export async function view_exer(id) {
 		choices: names,
 		loop: false,
 	});
-	const choise = excercises[exer];
+	const choice = excercises[exer];
 
-	if (editOrDel === 1) {
-		editExer(choise.id, database);
-	} else {
-		if (
-			await confirm({
-				message: `You sure you want to delete ${choise.name}?`,
-			})
-		) {
-			deleteExer(choise.id, database);
-		}
+	const updateRow = await select({
+		message: "What would you like to update?",
+		choices: [
+			{ name: "Name", value: "name" },
+			{ name: "description", value: "description" },
+			{ name: "BPM", value: "bpm" },
+			{ name: "Key", value: "key" },
+		],
+	});
+
+	const updatedInfo = await input({
+		message: "What would you like to change it to?",
+	});
+
+	const sql = database.prepare(
+		`UPDATE exercises SET ${updateRow} = ? WHERE id = ?`
+	);
+	sql.run(updatedInfo, choice.id);
+	console.log(chalk.blue("Updated!"));
+
+	if (
+		await confirm({
+			message: "Change something else about this excercise?",
+		})
+	) {
+		await editExer(excercises, database);
 	}
-
-	database.close();
 }
 
-function editExer(id, database) {
-	//todo
-	console.log("(haven't coded this part yet... sorry)");
-}
+async function deleteExer(excercises, database) {
+	let names = excercises.map((line, ind) => {
+		return { name: line.name, value: ind };
+	});
 
-function deleteExer(id, database) {
+	let exer = await select({
+		message: "Which one?",
+		choices: names,
+		loop: false,
+	});
+	const choice = excercises[exer];
+
 	const sql = database.prepare(`DELETE FROM exercises WHERE id = ?`);
-	sql.run(id);
-	console.log(chalk.red("Deleted!"));
+	if (
+		await confirm({
+			message: `You sure you want to delete ${choice.name}?`,
+		})
+	) {
+		sql.run(choice.id);
+		console.log(chalk.red("Deleted!"));
+	}
 }

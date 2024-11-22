@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
 import { DatabaseSync } from "node:sqlite";
+import { select } from "@inquirer/prompts";
+import chalk from "chalk";
 import { addUser } from "./add-user.js";
 import { deleteUser } from "./delete-user.js";
 import { searchUser } from "./search-user.js";
 import { login } from "./login.js";
 import { new_exer } from "./new_exer.js";
 import { view_exer } from "./view_exer.js";
-import { select } from "@inquirer/prompts";
-import chalk from "chalk";
+import { new_routine } from "./new_routine.js";
 
 const database = new DatabaseSync("./test.db");
 
@@ -20,7 +21,7 @@ const table1 = async () => {
 			{ name: "Add user", value: "add" },
 			{ name: "Delete user", value: "delete" },
 			{ name: "Search for user", value: "search" },
-			{ name: "View table", value: "view" },
+			// { name: "View table", value: "view" },
 		],
 	});
 	return choice;
@@ -42,11 +43,11 @@ const table1Switch = async choice => {
 			break;
 		case "search":
 			await searchUser();
-			break;
-		case "view":
-			let sql = database.prepare(`SELECT * FROM users ORDER BY id`);
-			let thing = sql.all();
-			console.log(thing);
+		// 	break;
+		// case "view":
+		// 	let sql = database.prepare(`SELECT * FROM users ORDER BY id`);
+		// 	let thing = sql.all();
+		// 	console.log(thing);
 	}
 };
 
@@ -58,8 +59,10 @@ const table2 = async (userId, visitNum = 1) => {
 	let table2 = await select({
 		message: greeting,
 		choices: [
+			//{ name: "Run a routine", value: "run_routine" },
 			{ name: "Create exercise", value: "new_exer" },
 			{ name: "View excercises", value: "view_exer" },
+			{ name: "Create a new routine", value: "new_routine" },
 			{ name: "Logout", value: "logout" },
 		],
 	});
@@ -71,14 +74,15 @@ const table2Switch = async (choice, id) => {
 		case "run_routine":
 			//todo
 			console.log("(haven't coded this part yet... sorry)");
+			await table2(id, 2);
 			break;
 		case "new_exer":
 			await new_exer(id);
 			await table2(id, 2);
 			break;
 		case "new_routine":
-			//todo
-			console.log("(haven't coded this part yet... sorry)");
+			await new_routine(id);
+			await table2(id, 2);
 			break;
 		case "view_exer":
 			await view_exer(id);

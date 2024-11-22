@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import { input, password } from "@inquirer/prompts";
+import { input, password, confirm } from "@inquirer/prompts";
 import { DatabaseSync } from "node:sqlite";
 
 export async function deleteUser() {
@@ -25,11 +25,22 @@ export async function deleteUser() {
 		});
 	}
 
-	const userDelete = database.prepare(`DELETE FROM users WHERE username = ?`);
-	userDelete.run(username);
-	database.close();
+	if (
+		await confirm({
+			message: `You sure you want to delete ${username}?`,
+		})
+	) {
+		const userDelete = database.prepare(
+			`DELETE FROM users WHERE username = ?`
+		);
+		userDelete.run(username);
 
-	console.log(
-		chalk.red("\r\nUser deleted! We hope you enjoyed your time with us.\r\n")
-	);
+		console.log(
+			chalk.red(
+				"\r\nUser deleted! We hope you enjoyed your time with us.\r\n"
+			)
+		);
+	}
+
+	database.close();
 }
