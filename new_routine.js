@@ -3,7 +3,7 @@ import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 
 export async function new_routine(id) {
-	const database = new DatabaseSync("./test.db");
+	const database = new DatabaseSync("./database.db");
 
 	//create tables
 
@@ -53,10 +53,10 @@ export async function new_routine(id) {
 
 	for (let i = 0, message = "First exercise:"; ; i++) {
 		if (i === 1) {
-			exerNames = [
-				{ name: "Done adding exercises", value: "done" },
-				...exerNames,
-			];
+			exerNames.unshift({
+				name: "Done adding exercises",
+				value: "done",
+			});
 			message = "Add another?";
 		}
 		let exer = await select({
@@ -84,15 +84,13 @@ export async function new_routine(id) {
 	let showRoutine = "";
 	getRoutine
 		.all(routineId)
-		.forEach(
-			(line, ind) => (showRoutine += "\n" + `${ind + 1}) ` + line.name)
-		);
+		.forEach((line, ind) => (showRoutine += `\n${ind + 1}) ${line.name}`));
 
 	console.log(
-		chalk.bgCyan("Your new routine:/n") +
-			chalk.blue(`${name}
-`) +
-			chalk.green(showRoutine)
+		chalk.bgGray("\nYour new routine:\n\n") +
+			chalk.blue.bold.underline(`${name}\n`) +
+			chalk.yellowBright(description ? `~${description}~\n` : ``) +
+			chalk.green(`${showRoutine}\n`)
 	);
 
 	database.close;

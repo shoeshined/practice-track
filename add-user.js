@@ -3,7 +3,7 @@
 import chalk from "chalk";
 import { input, password } from "@inquirer/prompts";
 import { DatabaseSync } from "node:sqlite";
-const database = new DatabaseSync("./test.db");
+const database = new DatabaseSync("./database.db");
 
 export async function addUser() {
 	let create = `CREATE TABLE if not exists users(

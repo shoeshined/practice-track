@@ -7,7 +7,7 @@ import chalk from "chalk";
 const term = pkg.terminal;
 
 export async function view_exer(id) {
-	const database = new DatabaseSync("./test.db");
+	const database = new DatabaseSync("./database.db");
 	let selection = database.prepare(
 		`SELECT * FROM exercises WHERE user_id = ? ORDER BY LOWER(name)`
 	);

@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"debug": "node --experimental-sqlite"
+		"debug": "node --experimental-sqlite index.js",
+		"sql": "node --experimental-sqlite"
 	},
 	"author": "Stuart Solomon",
 	"license": "ISC",

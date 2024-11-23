@@ -2,7 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { input } from "@inquirer/prompts";
 
 export async function new_exer(userId) {
-	const database = new DatabaseSync("./test.db");
+	const database = new DatabaseSync("./database.db");
 
 	let createExers = `CREATE TABLE if not exists exercises(
         id INTEGER PRIMARY KEY,

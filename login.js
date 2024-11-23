@@ -3,7 +3,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { input, password, select } from "@inquirer/prompts";
 
-const database = new DatabaseSync("./test.db");
+const database = new DatabaseSync("./database.db");
 
 export async function login() {
 	let username = await input({ message: "username:" });

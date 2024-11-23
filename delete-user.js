@@ -5,7 +5,7 @@ import { input, password, confirm } from "@inquirer/prompts";
 import { DatabaseSync } from "node:sqlite";
 
 export async function deleteUser() {
-	const database = new DatabaseSync("./test.db");
+	const database = new DatabaseSync("./database.db");
 
 	let username = await input({ message: "What's the username?" });
 

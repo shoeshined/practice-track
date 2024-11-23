@@ -5,7 +5,7 @@ import { input, confirm, select } from "@inquirer/prompts";
 import { DatabaseSync } from "node:sqlite";
 
 export async function searchUser() {
-	const database = new DatabaseSync("./test.db");
+	const database = new DatabaseSync("./database.db");
 
 	let exists = `SELECT name FROM sqlite_master WHERE type='table' AND name='users'`,
 		empty = `SELECT count(*) FROM (select 1 from users limit 1)`;
