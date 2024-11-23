@@ -14,7 +14,7 @@ import { run_routine } from "./run-routine.js";
 
 const database = new DatabaseSync("./database.db");
 
-const table1 = async () => {
+const menu1 = async () => {
 	const choice = await select({
 		message: "What do you want to do?",
 		choices: [
@@ -27,12 +27,13 @@ const table1 = async () => {
 	return choice;
 };
 
-const table1Switch = async choice => {
+const menu1Switch = async (choice, userId) => {
 	switch (choice) {
 		case "login":
 			userId = await login();
 			if (userId === "add") {
-				table1Switch("add");
+				userId = false;
+				menu1Switch("add", false);
 			}
 			break;
 		case "add":
@@ -44,20 +45,16 @@ const table1Switch = async choice => {
 		case "search":
 			await searchUser();
 			break;
-		case "view":
-			let sql = database.prepare(`SELECT * FROM users ORDER BY id`);
-			let thing = sql.all();
-			console.log(thing);
 	}
+	return userId;
 };
 
-const table2 = async (userId, visitNum = 1) => {
-	let selection = database.prepare(`SELECT * FROM users WHERE id = ?`);
-	const userInfo = selection.get(userId);
-	let greeting =
-		visitNum === 1 ? `Hi, ${userInfo.first_name}!` : `Anything else?`;
-	let table2 = await select({
-		message: greeting,
+const menu2 = async (userId, visitNum = 1) => {
+	const userInfoSql = database.prepare(`SELECT * FROM users WHERE id = ?`);
+	const userInfo = userInfoSql.get(userId);
+	let menu2 = await select({
+		message:
+			visitNum === 1 ? `Hi, ${userInfo.first_name}!` : `Anything else?`,
 		choices: [
 			{ name: "Run a routine", value: "run_routine" },
 			{ name: "Create exercise", value: "new_exer" },
@@ -67,32 +64,32 @@ const table2 = async (userId, visitNum = 1) => {
 			{ name: "Logout", value: "logout" },
 		],
 	});
-	await table2Switch(table2, userId);
+	await menu2Switch(menu2, userId);
 };
 
-const table2Switch = async (choice, id) => {
+const menu2Switch = async (choice, userId) => {
 	switch (choice) {
 		case "run_routine":
 			//todo
-			await run_routine(id);
-			await table2(id, 2);
+			await run_routine(userId);
+			await menu2(userId, 2);
 			break;
 		case "new_exer":
-			await new_exer(id);
-			await table2(id, 2);
+			await new_exer(userId);
+			await menu2(userId, 2);
 			break;
 		case "new_routine":
-			await new_routine(id);
-			await table2(id, 2);
+			await new_routine(userId);
+			await menu2(userId, 2);
 			break;
 		case "view_exer":
-			await view_exer(id);
-			await table2(id, 2);
+			await view_exer(userId);
+			await menu2(userId, 2);
 			break;
 		case "view_routine":
 			//todo
 			console.log("I haven't coded this bit yet...sorry");
-			await table2(id, 2);
+			await menu2(userId, 2);
 			break;
 		case "logout":
 			console.log(chalk.blue("Have a nice day!"));
@@ -100,7 +97,7 @@ const table2Switch = async (choice, id) => {
 };
 
 let userId = false;
-await table1Switch(await table1());
-if (userId) await table2(userId);
+userId = await menu1Switch(await menu1(), userId);
+if (userId) await menu2(userId);
 
 database.close();

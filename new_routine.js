@@ -2,12 +2,12 @@ import { DatabaseSync } from "node:sqlite";
 import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 
-export async function new_routine(id) {
+export async function new_routine(userId) {
 	const database = new DatabaseSync("./database.db");
 
 	//create tables
 
-	let createRoutines = `CREATE TABLE if not exists routines(
+	let createRoutinesSql = `CREATE TABLE if not exists routines(
         id INTEGER PRIMARY KEY,
         user_id INTEGER NOT NULL,
         name TEXT NOT NULL UNIQUE,
@@ -15,8 +15,8 @@ export async function new_routine(id) {
         count INTEGER,
         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
     )`;
-	database.exec(createRoutines);
-	let createRoutineExers = `CREATE TABLE if not exists routineexers(
+	database.exec(createRoutinesSql);
+	let createRoutineExersSql = `CREATE TABLE if not exists routineexers(
         id INTEGER PRIMARY KEY,
         routine_id INTEGER,
         exer_id INTEGER,
@@ -24,29 +24,29 @@ export async function new_routine(id) {
         FOREIGN KEY(routine_id) REFERENCES routines(id) ON DELETE CASCADE,
         FOREIGN KEY(exer_id) REFERENCES exercises(id) ON DELETE CASCADE   
     )`;
-	database.exec(createRoutineExers);
+	database.exec(createRoutineExersSql);
 
 	//creat routine
 
-	const name = await input({ message: "Routine name:" }),
-		description = await input({ message: "Descrition (optional):" });
+	const routineName = await input({ message: "Routine name:" }),
+		routineDescription = await input({ message: "Descrition (optional):" });
 
-	const routinesInsert = database.prepare(
+	const routinesInsertSql = database.prepare(
 		`INSERT INTO routines(user_id, name, description, count) VALUES (?,?,?,?)`
 	);
-	const routineId = routinesInsert.run(
-		id,
-		name,
-		description,
+	const routineId = routinesInsertSql.run(
+		userId,
+		routineName,
+		routineDescription,
 		0
 	).lastInsertRowid;
 
 	//add exercises
 
-	let selection = database.prepare(
+	let excercisesSql = database.prepare(
 		`SELECT id, user_id, name FROM exercises WHERE user_id = ? ORDER BY LOWER(name)`
 	);
-	let exercises = selection.all(id);
+	let exercises = excercisesSql.all(userId);
 	let exerNames = exercises.map((line, ind) => {
 		return { name: line.name, value: ind };
 	});
@@ -69,28 +69,33 @@ export async function new_routine(id) {
 			break;
 		}
 
-		const routineExersInsert = database.prepare(
+		const routineExersInsertSql = database.prepare(
 			`INSERT INTO routineexers(routine_id, exer_id, position) VALUES (?,?,?)`
 		);
-		routineExersInsert.run(routineId, exercises[exer].id, i);
+		routineExersInsertSql.run(routineId, exercises[exer].id, i);
 	}
-	const getRoutine = database.prepare(
+
+	//print routine
+
+	const getRoutineSql = database.prepare(
 		`SELECT name
         FROM routineexers
             JOIN exercises ON routineexers.exer_id = exercises.id
         WHERE routine_id = ?
         ORDER BY position`
 	);
-	let showRoutine = "";
-	getRoutine
+	let exersString = getRoutineSql
 		.all(routineId)
-		.forEach((line, ind) => (showRoutine += `\n${ind + 1}) ${line.name}`));
+		.map((line, ind) => `${ind + 1}) ${line.name}`)
+		.join("\n");
 
 	console.log(
 		chalk.bgGray("\nYour new routine:\n\n") +
-			chalk.blue.bold.underline(`${name}\n`) +
-			chalk.yellowBright(description ? `~${description}~\n` : ``) +
-			chalk.green(`${showRoutine}\n`)
+			chalk.blue.bold.underline(`${routineName}\n`) +
+			chalk.yellowBright(
+				routineDescription ? `~${routineDescription}~\n\n` : `\n`
+			) +
+			chalk.green(`${exersString}\n`)
 	);
 
 	database.close;

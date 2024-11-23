@@ -8,10 +8,10 @@ const database = new DatabaseSync("./database.db");
 export async function login() {
 	let username = await input({ message: "username:" });
 
-	let selection = database.prepare(`SELECT * FROM users where username = ?`);
-	let tryout = selection.get(username);
+	let userInfoSql = database.prepare(`SELECT * FROM users where username = ?`);
+	let userInfo = userInfoSql.get(username);
 
-	while (!tryout) {
+	while (!userInfo) {
 		let retry = await select({
 			message:
 				"Incorrect username. Would you like to create an account instead?",
@@ -24,11 +24,11 @@ export async function login() {
 		if (retry === "add") return "add";
 
 		username = await input({ message: "username:" });
-		tryout = selection.get(username);
+		userInfo = userInfoSql.get(username);
 	}
 
 	let pw = await password({ message: "password:", mask: true });
-	while (pw !== tryout.password) {
+	while (pw !== userInfo.password) {
 		pw = await password({
 			message: "Wrong password. Try again:",
 			mask: true,
@@ -36,5 +36,5 @@ export async function login() {
 	}
 
 	database.close();
-	return tryout.id;
+	return userInfo.id;
 }
