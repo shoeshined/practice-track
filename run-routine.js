@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
-import { input, select, checkbox } from "@inquirer/prompts";
+import { select, checkbox } from "@inquirer/prompts";
 
-export async function run_routine(userId) {
+export async function runRoutine(userId) {
 	const database = new DatabaseSync("./database.db");
 
 	const routinesListSql = database.prepare(

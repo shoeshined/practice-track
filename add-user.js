@@ -24,7 +24,7 @@ export async function addUser() {
 		username = await input({ message: "username taken, try again" });
 	}
 
-	const password = await password({ message: "password?", mask: true });
+	const pw = await password({ message: "password?", mask: true });
 	let confirmPw = await password({ message: "confirm password", mask: true });
 
 	while (confirmPw !== pw) {
@@ -41,7 +41,7 @@ export async function addUser() {
 	const userInsertSql = database.prepare(
 		`INSERT INTO users(first_name,last_name,username,password,email) VALUES (?,?,?,?,?)`
 	);
-	userInsertSql.run(first_name, last_name, username, password, email);
+	userInsertSql.run(first_name, last_name, username, pw, email);
 
 	console.log(chalk.blue(`\r\nUser ${username} created! Welcome!\r\n`));
 	database.close();

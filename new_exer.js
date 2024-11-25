@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { input } from "@inquirer/prompts";
 
-export async function new_exer(userId) {
+export async function newExer(userId) {
 	const database = new DatabaseSync("./database.db");
 
 	let createExersSql = `CREATE TABLE if not exists exercises(

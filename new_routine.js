@@ -2,7 +2,44 @@ import { DatabaseSync } from "node:sqlite";
 import { input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 
-export async function new_routine(userId) {
+export async function addToRoutine(userId, routineId, initMessage, start = 0) {
+	const database = new DatabaseSync("./database.db");
+
+	let excercisesSql = database.prepare(
+		`SELECT id, user_id, name FROM exercises WHERE user_id = ? ORDER BY LOWER(name)`
+	);
+	let exercises = excercisesSql.all(userId);
+	let exerNames = exercises.map((line, ind) => {
+		return { name: line.name, value: ind };
+	});
+
+	for (let i = start, message = initMessage; ; i++) {
+		if (i === start + 1) {
+			exerNames.unshift({
+				name: "Done adding exercises",
+				value: "done",
+			});
+			message = "Add another?";
+		}
+		let exer = await select({
+			message: message,
+			choices: exerNames,
+			loop: false,
+		});
+
+		if (exer === "done") {
+			break;
+		}
+
+		const routineExersInsertSql = database.prepare(
+			`INSERT INTO routineexers(routine_id, exer_id, position) VALUES (?,?,?)`
+		);
+		routineExersInsertSql.run(routineId, exercises[exer].id, i);
+	}
+	database.close();
+}
+
+export async function newRoutine(userId) {
 	const database = new DatabaseSync("./database.db");
 
 	//create tables
@@ -26,8 +63,6 @@ export async function new_routine(userId) {
     )`;
 	database.exec(createRoutineExersSql);
 
-	//creat routine
-
 	const routineName = await input({ message: "Routine name:" }),
 		routineDescription = await input({ message: "Descrition (optional):" });
 
@@ -41,39 +76,7 @@ export async function new_routine(userId) {
 		0
 	).lastInsertRowid;
 
-	//add exercises
-
-	let excercisesSql = database.prepare(
-		`SELECT id, user_id, name FROM exercises WHERE user_id = ? ORDER BY LOWER(name)`
-	);
-	let exercises = excercisesSql.all(userId);
-	let exerNames = exercises.map((line, ind) => {
-		return { name: line.name, value: ind };
-	});
-
-	for (let i = 0, message = "First exercise:"; ; i++) {
-		if (i === 1) {
-			exerNames.unshift({
-				name: "Done adding exercises",
-				value: "done",
-			});
-			message = "Add another?";
-		}
-		let exer = await select({
-			message: message,
-			choices: exerNames,
-			loop: false,
-		});
-
-		if (exer === "done") {
-			break;
-		}
-
-		const routineExersInsertSql = database.prepare(
-			`INSERT INTO routineexers(routine_id, exer_id, position) VALUES (?,?,?)`
-		);
-		routineExersInsertSql.run(routineId, exercises[exer].id, i);
-	}
+	await addToRoutine(userId, routineId, "First exercise:");
 
 	//print routine
 

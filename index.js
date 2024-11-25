@@ -3,14 +3,6 @@
 import { DatabaseSync } from "node:sqlite";
 import { select } from "@inquirer/prompts";
 import chalk from "chalk";
-import { addUser } from "./add-user.js";
-import { deleteUser } from "./delete-user.js";
-import { searchUser } from "./search-user.js";
-import { login } from "./login.js";
-import { new_exer } from "./new_exer.js";
-import { view_exer } from "./view_exer.js";
-import { new_routine } from "./new_routine.js";
-import { run_routine } from "./run-routine.js";
 
 const database = new DatabaseSync("./database.db");
 
@@ -30,6 +22,7 @@ const menu1 = async () => {
 const menu1Switch = async (choice, userId) => {
 	switch (choice) {
 		case "login":
+			const { login } = await import("./login.js");
 			userId = await login();
 			if (userId === "add") {
 				userId = false;
@@ -37,12 +30,15 @@ const menu1Switch = async (choice, userId) => {
 			}
 			break;
 		case "add":
+			const { addUser } = await import("./add-user.js");
 			await addUser();
 			break;
 		case "delete":
+			const { deleteUser } = await import("./delete-user.js");
 			await deleteUser();
 			break;
 		case "search":
+			const { searchUser } = await import("./search-user.js");
 			await searchUser();
 			break;
 	}
@@ -56,11 +52,11 @@ const menu2 = async (userId, visitNum = 1) => {
 		message:
 			visitNum === 1 ? `Hi, ${userInfo.first_name}!` : `Anything else?`,
 		choices: [
-			{ name: "Run a routine", value: "run_routine" },
-			{ name: "Create exercise", value: "new_exer" },
-			{ name: "View excercises", value: "view_exer" },
-			{ name: "Create a new routine", value: "new_routine" },
-			{ name: "View routines", value: "view_routine" },
+			{ name: "Run a routine", value: "runRoutine" },
+			{ name: "Create exercise", value: "newExer" },
+			{ name: "View excercises", value: "viewExer" },
+			{ name: "Create a new routine", value: "newRoutine" },
+			{ name: "View routines", value: "viewRoutine" },
 			{ name: "Logout", value: "logout" },
 		],
 	});
@@ -69,26 +65,30 @@ const menu2 = async (userId, visitNum = 1) => {
 
 const menu2Switch = async (choice, userId) => {
 	switch (choice) {
-		case "run_routine":
+		case "runRoutine":
+			const { runRoutine } = await import("./run-routine.js");
+			await runRoutine(userId);
+			await menu2(userId, 2);
+			break;
+		case "newExer":
+			const { newExer } = await import("./new_exer.js");
+			await newExer(userId);
+			await menu2(userId, 2);
+			break;
+		case "newRoutine":
+			const { newRoutine } = await import("./new_routine.js");
+			await newRoutine(userId);
+			await menu2(userId, 2);
+			break;
+		case "viewExer":
+			const { viewExer } = await import("./view_exer.js");
+			await viewExer(userId);
+			await menu2(userId, 2);
+			break;
+		case "viewRoutine":
 			//todo
-			await run_routine(userId);
-			await menu2(userId, 2);
-			break;
-		case "new_exer":
-			await new_exer(userId);
-			await menu2(userId, 2);
-			break;
-		case "new_routine":
-			await new_routine(userId);
-			await menu2(userId, 2);
-			break;
-		case "view_exer":
-			await view_exer(userId);
-			await menu2(userId, 2);
-			break;
-		case "view_routine":
-			//todo
-			console.log("I haven't coded this bit yet...sorry");
+			const { viewRoutine } = await import("./view_routine.js");
+			await viewRoutine(userId);
 			await menu2(userId, 2);
 			break;
 		case "logout":
