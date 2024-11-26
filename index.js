@@ -57,6 +57,7 @@ const menu2 = async (userId, visitNum = 1) => {
 			{ name: "View excercises", value: "viewExer" },
 			{ name: "Create a new routine", value: "newRoutine" },
 			{ name: "View routines", value: "viewRoutine" },
+			{ name: "View practice history", value: "viewHistory" },
 			{ name: "Logout", value: "logout" },
 		],
 	});
@@ -71,24 +72,28 @@ const menu2Switch = async (choice, userId) => {
 			await menu2(userId, 2);
 			break;
 		case "newExer":
-			const { newExer } = await import("./new_exer.js");
+			const { newExer } = await import("./new-exer.js");
 			await newExer(userId);
 			await menu2(userId, 2);
 			break;
 		case "newRoutine":
-			const { newRoutine } = await import("./new_routine.js");
+			const { newRoutine } = await import("./new-routine.js");
 			await newRoutine(userId);
 			await menu2(userId, 2);
 			break;
 		case "viewExer":
-			const { viewExer } = await import("./view_exer.js");
+			const { viewExer } = await import("./view-exer.js");
 			await viewExer(userId);
 			await menu2(userId, 2);
 			break;
 		case "viewRoutine":
-			//todo
-			const { viewRoutine } = await import("./view_routine.js");
+			const { viewRoutine } = await import("./view-routine.js");
 			await viewRoutine(userId);
+			await menu2(userId, 2);
+			break;
+		case "viewHistory":
+			const { viewHistory } = await import("./view-history.js");
+			await viewHistory(userId);
 			await menu2(userId, 2);
 			break;
 		case "logout":

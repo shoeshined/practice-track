@@ -4,7 +4,7 @@ import { DatabaseSync } from "node:sqlite";
 import { select, confirm, input } from "@inquirer/prompts";
 import pkg from "terminal-kit";
 import chalk from "chalk";
-import { new_exer } from "./new_exer.js";
+import { new_exer } from "./new-exer.js";
 const term = pkg.terminal;
 
 async function whichExer(excercises) {

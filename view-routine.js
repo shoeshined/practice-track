@@ -44,7 +44,7 @@ async function editRoutine(database, userId, routineId, repeat = false) {
 			await descSql.run(descUpdate, routineId);
 			break;
 		case "add":
-			const { addToRoutine } = await import("./new_routine.js");
+			const { addToRoutine } = await import("./new-routine.js");
 			let start = thisRoutineSql.all(routineId).length;
 			await addToRoutine(userId, routineId, "Add exercise:", start);
 			break;
@@ -114,7 +114,7 @@ export async function viewRoutine(userId) {
 				message: "You don't have any routines. Would you like to add one?",
 			})
 		) {
-			const { new_routine } = await import("./new_routine.js");
+			const { new_routine } = await import("./new-routine.js");
 			await new_routine(userId);
 		}
 		return;
@@ -154,14 +154,15 @@ export async function viewRoutine(userId) {
 				chalk.blue.bold.underline(`${routineChoice.name}\n`) +
 				chalk.yellowBright(
 					routineChoice.description
-						? `~${routineChoice.description}~\n\n`
-						: `\n`
+						? `~${routineChoice.description}~\n`
+						: ``
 				) +
+				`you've run this ${routineChoice.count} times\n\n` +
 				chalk.green(`${exersString}\n`)
 		);
 
 		editOrDel = await select({
-			message: `Would you like to edit or delecte ${routineChoice.name}?`,
+			message: `Would you like to edit or delete ${routineChoice.name}?`,
 			choices: [
 				{ name: `Edit ${routineChoice.name}`, value: 1 },
 				{ name: `Delete ${routineChoice.name}`, value: 2 },
