@@ -21,7 +21,11 @@ export async function login() {
 			],
 		});
 
-		if (retry === "add") return "add";
+		if (retry === "add") {
+			const { addUser } = await import("./add-user.js");
+			await addUser();
+			return false;
+		}
 
 		username = await input({ message: "username:" });
 		userInfo = userInfoSql.get(username);

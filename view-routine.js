@@ -103,12 +103,15 @@ async function deleteRoutine(database, routineChoice) {
 
 export async function viewRoutine(userId) {
 	const database = new DatabaseSync("./database.db");
-	let routinesSql = database.prepare(
-		`SELECT * FROM routines WHERE user_id = ? ORDER BY LOWER(name)`
-	);
-	let routines = routinesSql.all(userId);
+	let routinesSql, routines;
 
-	if (routines.length < 1) {
+	try {
+		routinesSql = database.prepare(
+			`SELECT * FROM routines WHERE user_id = ? ORDER BY LOWER(name)`
+		);
+		routines = routinesSql.all(userId);
+		if (routines.length === 0) throw "";
+	} catch {
 		if (
 			await confirm({
 				message: "You don't have any routines. Would you like to add one?",

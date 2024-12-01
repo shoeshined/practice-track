@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { select, checkbox } from "@inquirer/prompts";
+import { select, checkbox, confirm } from "@inquirer/prompts";
 
 export async function runRoutine(userId) {
 	const database = new DatabaseSync("./database.db");
@@ -23,17 +23,30 @@ export async function runRoutine(userId) {
     )`;
 	database.exec(createHistoryExersSql);
 
-	const routinesListSql = database.prepare(
-		`SELECT name, id, count, description FROM routines WHERE user_id = ? ORDER BY count`
-	);
-	const routinesList = routinesListSql.all(userId);
+	let routinesListSql, routinesList, routine;
 
-	const routine = await select({
-		message: "Choose a routine",
-		choices: routinesList.map(line => {
-			return { name: line.name, value: line };
-		}),
-	});
+	try {
+		routinesListSql = database.prepare(
+			`SELECT name, id, count, description FROM routines WHERE user_id = ? ORDER BY count`
+		);
+		routinesList = routinesListSql.all(userId);
+
+		routine = await select({
+			message: "Choose a routine",
+			choices: routinesList.map(line => {
+				return { name: line.name, value: line };
+			}),
+		});
+	} catch (error) {
+		const emptyRoute = await confirm({
+			message: "You don't have any routines! Would you like to make one?",
+		});
+		if (emptyRoute) {
+			const { newRoutine } = await import("./new-routine.js");
+			await newRoutine(userId);
+		}
+		return;
+	}
 
 	const routineSql = database.prepare(
 		`SELECT name, exer_id, position

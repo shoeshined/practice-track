@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { input, select } from "@inquirer/prompts";
+import { input, select, confirm } from "@inquirer/prompts";
 import chalk from "chalk";
 
 export async function addToRoutine(userId, routineId, initMessage, start = 0) {
@@ -62,6 +62,22 @@ export async function newRoutine(userId) {
         FOREIGN KEY(exer_id) REFERENCES exercises(id) ON DELETE CASCADE   
     )`;
 	database.exec(createRoutineExersSql);
+
+	try {
+		let exerCheckSql = database.prepare(
+			`SELECT count(*) FROM exercises WHERE user_id = ?`
+		);
+		if (!exerCheckSql.get(userId)["count(*)"]) throw "";
+	} catch {
+		const noExer = await confirm({
+			message: "You don't have any exercises. Would you like to add one?",
+		});
+		if (noExer) {
+			const { newExer } = await import("./new-exer.js");
+			await newExer(userId);
+		}
+		return;
+	}
 
 	const routineName = await input({ message: "Routine name:" }),
 		routineDescription = await input({ message: "Descrition (optional):" });

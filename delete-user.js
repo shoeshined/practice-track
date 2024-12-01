@@ -17,9 +17,9 @@ export async function deleteUser() {
 		userInfo = userSql.get(username);
 	}
 
-	let password = await password({ message: "password?", mask: true });
-	while (password !== userInfo.password) {
-		password = await password({
+	let pw = await password({ message: "password?", mask: true });
+	while (pw !== userInfo.password) {
+		pw = await password({
 			message: "Wrong password. Try again:",
 			mask: true,
 		});

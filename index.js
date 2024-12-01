@@ -19,16 +19,11 @@ const menu1 = async () => {
 	return choice;
 };
 
-const menu1Switch = async (choice, userId) => {
+const menu1Switch = async choice => {
 	switch (choice) {
 		case "login":
 			const { login } = await import("./login.js");
-			userId = await login();
-			if (userId === "add") {
-				userId = false;
-				menu1Switch("add", false);
-			}
-			break;
+			return await login();
 		case "add":
 			const { addUser } = await import("./add-user.js");
 			await addUser();
@@ -42,7 +37,7 @@ const menu1Switch = async (choice, userId) => {
 			await searchUser();
 			break;
 	}
-	return userId;
+	return false;
 };
 
 const menu2 = async (userId, visitNum = 1) => {
@@ -101,8 +96,7 @@ const menu2Switch = async (choice, userId) => {
 	}
 };
 
-let userId = false;
-userId = await menu1Switch(await menu1(), userId);
+let userId = await menu1Switch(await menu1());
 if (userId) await menu2(userId);
 
 database.close();

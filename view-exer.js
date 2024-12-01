@@ -4,7 +4,7 @@ import { DatabaseSync } from "node:sqlite";
 import { select, confirm, input } from "@inquirer/prompts";
 import pkg from "terminal-kit";
 import chalk from "chalk";
-import { new_exer } from "./new-exer.js";
+import { newExer } from "./new-exer.js";
 const term = pkg.terminal;
 
 async function whichExer(excercises) {
@@ -67,18 +67,21 @@ async function deleteExer(excercises, database) {
 
 export async function viewExer(userId) {
 	const database = new DatabaseSync("./database.db");
-	let excercisesSql = database.prepare(
-		`SELECT * FROM exercises WHERE user_id = ? ORDER BY LOWER(name)`
-	);
-	let excercises = excercisesSql.all(userId);
+	let excercises, excercisesSql;
 
-	if (excercises.length < 1) {
+	try {
+		excercisesSql = database.prepare(
+			`SELECT * FROM exercises WHERE user_id = ? ORDER BY LOWER(name)`
+		);
+		excercises = excercisesSql.all(userId);
+		if (excercises.length === 0) throw "";
+	} catch {
 		if (
 			await confirm({
 				message: "You don't have any exercises. Would you like to add one?",
 			})
 		) {
-			await new_exer(userId);
+			await newExer(userId);
 		}
 		return;
 	}
@@ -113,7 +116,7 @@ export async function viewExer(userId) {
 
 		switch (editOrDel) {
 			case 1:
-				await new_exer(userId);
+				await newExer(userId);
 				break;
 			case 2:
 				await editExer(excercises, database);
