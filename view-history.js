@@ -5,10 +5,18 @@ import chalk from "chalk";
 export async function viewHistory(userId) {
 	const database = new DatabaseSync("./database.db");
 
-	const historySql = database.prepare(`SELECT * FROM runhistory 
+	let historySql, runHistory;
+
+	try {
+		historySql = database.prepare(`SELECT * FROM runhistory 
         WHERE user_id = ?
         ORDER BY time DESC`);
-	const runHistory = historySql.all(userId);
+		runHistory = historySql.all(userId);
+		if (runHistory.length === 0) throw "";
+	} catch {
+		console.log(chalk.yellowBright("You haven't run a routine yet!"));
+		return;
+	}
 
 	const listRuns = runHistory.map(run => {
 		let time = new Date(run.time);
@@ -55,6 +63,5 @@ export async function viewHistory(userId) {
 	);
 
 	await viewHistory(userId);
+	database.close();
 }
-
-// viewHistory(1);

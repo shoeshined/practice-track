@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { DatabaseSync } from "node:sqlite";
 import { select } from "@inquirer/prompts";
 import chalk from "chalk";
@@ -37,7 +35,6 @@ const menu1Switch = async choice => {
 			await searchUser();
 			break;
 	}
-	return false;
 };
 
 const menu2 = async (userId, visitNum = 1) => {
